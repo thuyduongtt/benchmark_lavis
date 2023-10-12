@@ -3,11 +3,16 @@ import csv
 from datetime import datetime
 
 
-def run_pipeline(vqatask, path_to_dataset, limit=0, start_at=0, splits=None):
+def init_csv_file():
     timestamp = datetime.now().isoformat()
     csv_file = open(f'result_{timestamp}.csv', 'w')
     csv_writer = csv.writer(csv_file)
     csv_writer.writerow(['id', 'image', 'question', 'answer', 'prediction', 'n_hop', 'has_scene_graph', 'split'])
+    return csv_file, csv_writer
+
+
+def run_pipeline(vqatask, path_to_dataset, limit=0, start_at=0, splits=None):
+    csv_file, csv_writer = init_csv_file()
 
     if splits is None:
         splits = ['train', 'test']
@@ -22,6 +27,11 @@ def run_pipeline(vqatask, path_to_dataset, limit=0, start_at=0, splits=None):
 
             if i == 1 or i % 10 == 0:
                 print(f"[{i}]: {d['image_id']}")
+
+            # split into smaller CSV file every 1000 records
+            if i % 1000 == 0:
+                csv_file.close()
+                csv_file, csv_writer = init_csv_file()
 
             local_img_path = f"{split}/{d['image_id']}.jpg"
             img_path = f"{path_to_dataset}/" + local_img_path
