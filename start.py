@@ -7,7 +7,7 @@ from pipeline import run_pipeline
 
 
 def vqatask(image, question):
-    device = 'cuda' if torch.cuda.is_available() else 'cpu'
+    device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
     raw_image = Image.open(image).convert('RGB')
 
     model, vis_processors, txt_processors = (
