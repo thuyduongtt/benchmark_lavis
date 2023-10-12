@@ -1,5 +1,4 @@
 import ijson
-import json
 import csv
 from datetime import datetime
 
@@ -69,7 +68,3 @@ def stream_data(path_to_json_file, limit=0, start_at=0):
             yield record
 
 
-if __name__ == '__main__':
-    dd = stream_data('/Volumes/DATA/_Code/Git/tdthesis/ds_final/export_unbalanced/test.json', limit=2)
-    for d in dd:
-        print(d)
