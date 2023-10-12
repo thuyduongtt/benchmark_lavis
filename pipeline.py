@@ -1,18 +1,22 @@
 import ijson
 import csv
 from datetime import datetime
+from pathlib import Path
 
 
-def init_csv_file():
+def init_csv_file(output_dir_name):
+    if not Path(output_dir_name).exists():
+        Path(output_dir_name).mkdir(parents=True)
+
     timestamp = datetime.now().isoformat()
-    csv_file = open(f'result_{timestamp}.csv', 'w')
+    csv_file = open(f'{output_dir_name}/result_{timestamp}.csv', 'w')
     csv_writer = csv.writer(csv_file)
     csv_writer.writerow(['id', 'image', 'question', 'answer', 'prediction', 'n_hop', 'has_scene_graph', 'split'])
     return csv_file, csv_writer
 
 
-def run_pipeline(vqatask, path_to_dataset, limit=0, start_at=0, splits=None):
-    csv_file, csv_writer = init_csv_file()
+def run_pipeline(vqatask, path_to_dataset, output_dir_name, limit=0, start_at=0, splits=None):
+    csv_file, csv_writer = init_csv_file(output_dir_name)
 
     if splits is None:
         splits = ['train', 'test']
@@ -31,7 +35,7 @@ def run_pipeline(vqatask, path_to_dataset, limit=0, start_at=0, splits=None):
             # split into smaller CSV file every 1000 records
             if i % 1000 == 0:
                 csv_file.close()
-                csv_file, csv_writer = init_csv_file()
+                csv_file, csv_writer = init_csv_file(output_dir_name)
 
             local_img_path = f"{split}/{d['image_id']}.jpg"
             img_path = f"{path_to_dataset}/" + local_img_path

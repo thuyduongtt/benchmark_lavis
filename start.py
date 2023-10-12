@@ -20,7 +20,8 @@ def vqatask(image, question):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--path_to_ds', type=str, required=True, help='Path to dataset')
+    parser.add_argument('--output_dir_name', type=str, default='output', help='Path to output')
     parser.add_argument('--limit', type=int, default=0, help='Max number of samples')
     args = parser.parse_args()
 
-    run_pipeline(vqatask, args.path_to_ds, limit=args.limit)
+    run_pipeline(vqatask, args.path_to_ds, args.output_dir_name, limit=args.limit)
