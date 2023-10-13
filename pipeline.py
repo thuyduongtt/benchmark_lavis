@@ -30,7 +30,7 @@ def run_pipeline(vqatask, path_to_dataset, output_dir_name, limit=0, start_at=0,
         for d in json_data:
             i += 1
 
-            if i == 1 or i % 10 == 0:
+            if i == 1 or i % 100 == 0:
                 print(f"[{i}]: {d['image_id']}")
 
             # split into smaller CSV file every 1000 records
@@ -42,6 +42,8 @@ def run_pipeline(vqatask, path_to_dataset, output_dir_name, limit=0, start_at=0,
             img_path = f"{path_to_dataset}/" + local_img_path
 
             prediction = vqatask(img_path, d['question'])
+            # prediction = 'hehe'  # turn off model for pipeline testing
+
             answers = d['answers']
             csv_writer.writerow([d['image_id'], local_img_path, d['question'], answers, prediction, d['n_hop'], d['has_scene_graph'], split])
 

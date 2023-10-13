@@ -71,6 +71,7 @@ module load cudnn
 module load conda
 
 # Do stuff. Describe how to perform your experiment or simulation here.
+conda activate kosmos2
 python start.py --path_to_ds unbalanced --output_dir_name output_unbalanced
 
 # No longer exit on any error.
