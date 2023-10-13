@@ -2,6 +2,7 @@ import ijson
 import csv
 from datetime import datetime
 from pathlib import Path
+import ast
 
 
 def init_csv_file(output_dir_name):
@@ -80,5 +81,43 @@ def stream_data(path_to_json_file, limit=0, start_at=0):
                 return
 
             yield record
+
+
+def analysis_result(csv_file):
+    total = 0
+    correct = 0
+    total_by_hop = {}
+    correct_by_hop = {}
+    with open(csv_file) as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            total += 1
+
+            n_hop = row['n_hop']
+            if n_hop not in total_by_hop:
+                total_by_hop[n_hop] = 0
+                correct_by_hop[n_hop] = 0
+            total_by_hop[n_hop] += 1
+
+            answer_str = row['answer'].lower()
+            prediction_str = row['prediction'].lower()
+            answer = ast.literal_eval(answer_str)
+            prediction = ast.literal_eval(prediction_str)
+
+            is_correct = prediction[0] in answer
+            if is_correct:
+                correct += 1
+                correct_by_hop[n_hop] += 1
+
+    print('Total:', total, ', Correct:', correct, ' Accuracy:', f'{correct/total:.2f}')
+    for h in correct_by_hop.keys():
+        print(f'{h}-hop:', f'{correct_by_hop[h]/total_by_hop[n_hop]:.2f}')
+
+
+if __name__ == '__main__':
+    for csvfile in Path('result').iterdir():
+        print(csvfile.name)
+        analysis_result(f'result/{csvfile.name}')
+        print('=====')
 
 
