@@ -28,6 +28,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--path_to_ds', type=str, required=True, help='Path to dataset')
     parser.add_argument('--output_dir_name', type=str, default='output', help='Path to output')
+    parser.add_argument('--split', type=str, default='train', help='Set to "train" or "test"')
     parser.add_argument('--start_at', type=int, default=0, help='Index of the sample to start from')
     parser.add_argument('--limit', type=int, default=0, help='Max number of samples')
     args = parser.parse_args()

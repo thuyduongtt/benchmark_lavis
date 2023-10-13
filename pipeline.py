@@ -16,36 +16,32 @@ def init_csv_file(output_dir_name):
     return csv_file, csv_writer
 
 
-def run_pipeline(vqatask, path_to_dataset, output_dir_name, limit=0, start_at=0, splits=None):
+def run_pipeline(vqatask, path_to_dataset, output_dir_name, limit=0, start_at=0, split='train'):
     csv_file, csv_writer = init_csv_file(output_dir_name)
 
-    if splits is None:
-        splits = ['train', 'test']
+    json_data = stream_data(f'{path_to_dataset}/{split}.json', limit=limit, start_at=start_at)
 
-    for split in splits:
-        print('==========', split)
-        json_data = stream_data(f'{path_to_dataset}/{split}.json', limit=limit, start_at=start_at)
+    i = 0
+    for d in json_data:
+        i += 1
 
-        i = 0
-        for d in json_data:
-            i += 1
+        if i == 1 or i % 100 == 0:
+            print(f"[{i}]: {d['image_id']}")
 
-            if i == 1 or i % 100 == 0:
-                print(f"[{i}]: {d['image_id']}")
+        # split into smaller CSV file every 1000 records
+        if i % 1000 == 0:
+            csv_file.close()
+            csv_file, csv_writer = init_csv_file(output_dir_name)
 
-            # split into smaller CSV file every 1000 records
-            if i % 1000 == 0:
-                csv_file.close()
-                csv_file, csv_writer = init_csv_file(output_dir_name)
+        local_img_path = f"{split}/{d['image_id']}.jpg"
+        img_path = f"{path_to_dataset}/" + local_img_path
 
-            local_img_path = f"{split}/{d['image_id']}.jpg"
-            img_path = f"{path_to_dataset}/" + local_img_path
+        prediction = vqatask(img_path, d['question'])
+        # prediction = 'prediction'  # turn off model for pipeline testing
 
-            prediction = vqatask(img_path, d['question'])
-            # prediction = 'hehe'  # turn off model for pipeline testing
-
-            answers = d['answers']
-            csv_writer.writerow([d['image_id'], local_img_path, d['question'], answers, prediction, d['n_hop'], d['has_scene_graph'], split])
+        answers = d['answers']
+        csv_writer.writerow([d['image_id'], local_img_path, d['question'], answers,
+                             prediction, d['n_hop'], d['has_scene_graph'], split])
 
     csv_file.close()
 
@@ -111,9 +107,9 @@ def analysis_result(csv_file):
                 correct += 1
                 correct_by_hop[n_hop] += 1
 
-    print('Total:', total, ', Correct:', correct, ' Accuracy:', f'{correct/total:.2f}')
+    print('Total:', total, ', Correct:', correct, ' Accuracy:', f'{correct / total:.2f}')
     for h in correct_by_hop.keys():
-        print(f'{h}-hop:', f'{correct_by_hop[h]/total_by_hop[n_hop]:.2f}')
+        print(f'{h}-hop:', f'{correct_by_hop[h] / total_by_hop[n_hop]:.2f}')
 
 
 if __name__ == '__main__':
@@ -121,5 +117,3 @@ if __name__ == '__main__':
         print(csvfile.name)
         analysis_result(f'result/{csvfile.name}')
         print('=====')
-
-
