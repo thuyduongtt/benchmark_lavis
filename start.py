@@ -33,4 +33,4 @@ if __name__ == '__main__':
     parser.add_argument('--limit', type=int, default=0, help='Max number of samples')
     args = parser.parse_args()
 
-    run_pipeline(vqatask, args.path_to_ds, args.output_dir_name, limit=args.limit, start_at=args.start_at)
+    run_pipeline(vqatask, args.path_to_ds, args.output_dir_name, limit=args.limit, start_at=args.start_at, split=args.split)
