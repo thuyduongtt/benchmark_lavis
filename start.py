@@ -1,17 +1,20 @@
 import argparse
+
 import torch
 from PIL import Image
 from lavis.models import load_model_and_preprocess
 
 from pipeline import run_pipeline
 
-device = 'cuda' if torch.cuda.is_available() else 'cpu'
 blip_model = None
+
+device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 
 def load_model():
     global blip_model
-    blip_model = load_model_and_preprocess(name='blip_vqa', model_type='vqav2', is_eval=True, device=device)
+    # blip_model = load_model_and_preprocess(name='blip_vqa', model_type='vqav2', is_eval=True, device=device)
+    blip_model = load_model_and_preprocess(name="blip2_t5", model_type="pretrain_flant5xxl", is_eval=True, device=device)
 
 
 def vqatask(image, question):
@@ -20,8 +23,9 @@ def vqatask(image, question):
     model, vis_processors, txt_processors = blip_model
     raw_image = Image.open(image).convert('RGB')
     image = vis_processors['eval'](raw_image).unsqueeze(0).to(device)
-    question = txt_processors['eval'](question)
-    return model.predict_answers(samples={'image': image, 'text_input': question}, inference_method='generate')
+    # question = txt_processors['eval'](question)
+    # return model.predict_answers(samples={'image': image, 'text_input': question}, inference_method='generate')
+    return model.generate({"image": image, "prompt": f"Question: {question} Answer:"})
 
 
 if __name__ == '__main__':
@@ -33,4 +37,5 @@ if __name__ == '__main__':
     parser.add_argument('--limit', type=int, default=0, help='Max number of samples')
     args = parser.parse_args()
 
-    run_pipeline(vqatask, args.path_to_ds, args.output_dir_name, limit=args.limit, start_at=args.start_at, split=args.split)
+    run_pipeline(vqatask, args.path_to_ds, args.output_dir_name, limit=args.limit, start_at=args.start_at,
+                 split=args.split)
