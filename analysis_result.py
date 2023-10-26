@@ -166,7 +166,7 @@ def analysis_result(list_of_result_dir, limit=0):
                         score_by_scene_graph['with' if row['has_scene_graph'] else 'without'][s] += current_score[s]
                         score_by_ds[ds_name][s] += current_score[s]
 
-    print('Total:', total, ', Score:', score)
+    print('Total:', total, '| Score:', score)
     for s in METRICS:
         print('=====', s)
         print('Acc:', f'{get_ratio(score[s], total):.2f}')
