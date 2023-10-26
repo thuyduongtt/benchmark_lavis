@@ -72,7 +72,9 @@ def vqa_acc(pred, gt):
 # depending on the model, answer might be given within a complete sentence. e.g.: [answer] The length is 300 meters
 # we need to extract "The length is 300 meters" only
 def extract_answer(answer_text):
-    return answer_text
+    if answer_text.startswith('Answer:'):
+        return answer_text[7:].strip()
+    return answer_text.strip()
 
 
 def get_ratio(a, b):
