@@ -37,7 +37,7 @@ class Score:
             self.vqa_acc = value
 
     def __str__(self):
-        return f'exact_match: {self.exact_match}; substring: {self.substring}; similarity: {self.similarity:.2f}; vqa_acc: {self.vqa_acc:.2f}; '
+        return f'exact_match: {self.exact_match}; substring: {self.substring}; similarity: {self.similarity:.2f};'
 
 
 # gt is the ground truth list of answers
@@ -47,7 +47,8 @@ def exact_match_score(pred, gt):
 
 def substring_score(pred, gt):
     for s in gt:
-        if pred in s:
+        gt_words = s.split()
+        if pred in gt_words:
             return 1
     return 0
 
@@ -165,9 +166,10 @@ def analysis_result(list_of_result_dir, limit=0):
                         score_by_scene_graph['with' if row['has_scene_graph'] else 'without'][s] += current_score[s]
                         score_by_ds[ds_name][s] += current_score[s]
 
+    print('Total:', total, ', Score:', score)
     for s in METRICS:
         print('=====', s)
-        print('Total:', total, ', Correct:', score, 'Acc:', f'{get_ratio(score[s], total):.2f}')
+        print('Acc:', f'{get_ratio(score[s], total):.2f}')
         for h in score_by_hop.keys():
             print(f'{h}-hop:', f'{get_ratio(score_by_hop[h][s], total_by_hop[n_hop]):.2f}')
         print('W/ Scene graph:', f"{get_ratio(score_by_scene_graph['with'][s], total_by_scene_graph['with']):.2f}")
@@ -182,5 +184,5 @@ if __name__ == '__main__':
 
     # pred = 'America'
     # gt = ['United States']
-    # scr = similarity_score(pred, gt)
+    # scr = substring_score(pred, gt)
     # print(scr)
