@@ -142,7 +142,9 @@ def analysis_result(list_of_result_dir):
                     total_by_ds[ds_name] += 1
 
                     prediction_str = row['prediction'].lower()
-                    prediction = extract_answer(ast.literal_eval(prediction_str)[0])
+                    if prediction_str.startswith('['):
+                        prediction_str = ast.literal_eval(prediction_str)[0]
+                    prediction = extract_answer(prediction_str)
 
                     # compute all scores
                     current_score = Score()
