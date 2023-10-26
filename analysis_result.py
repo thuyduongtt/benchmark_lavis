@@ -58,7 +58,7 @@ def similarity_score(pred, gt):
     pred_emb = similarity_model.encode(pred, convert_to_tensor=True, device=device)
     for s in gt:
         emb = similarity_model.encode(s, convert_to_tensor=True, device=device)
-        current_score = util.pytorch_cos_sim(pred_emb, emb)
+        current_score = util.pytorch_cos_sim(pred_emb, emb).item()
         if current_score > max_score:
             max_score = current_score
     return max_score
@@ -83,7 +83,7 @@ def get_ratio(a, b):
     return a / b
 
 
-def analysis_result(list_of_result_dir):
+def analysis_result(list_of_result_dir, limit=0):
     total = 0
     score = Score()
 
@@ -110,7 +110,11 @@ def analysis_result(list_of_result_dir):
 
     count = 0
     for folder in list_of_result_dir:
+        if 0 < limit < count:
+            break
         for csvfile in Path(folder).iterdir():
+            if 0 < limit < count:
+                break
             csv_file = f'{csvfile.parent}/{csvfile.name}'
             with open(csv_file) as f:
                 count += 1
@@ -175,3 +179,8 @@ def analysis_result(list_of_result_dir):
 
 if __name__ == '__main__':
     analysis_result(['result/output_balanced_10', 'result/output_balanced_10_test'])
+
+    # pred = 'America'
+    # gt = ['United States']
+    # scr = similarity_score(pred, gt)
+    # print(scr)
