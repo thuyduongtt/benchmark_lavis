@@ -108,10 +108,15 @@ def analysis_result(list_of_result_dir):
         'GLDv2': Score()
     }
 
+    count = 0
     for folder in list_of_result_dir:
         for csvfile in Path(folder).iterdir():
             csv_file = f'{csvfile.parent}/{csvfile.name}'
             with open(csv_file) as f:
+                count += 1
+                if count % 100 == 0:
+                    print(count)
+
                 reader = csv.DictReader(f)
                 for row in reader:
                     # there's a bug that the answer set is empty, ignore them
