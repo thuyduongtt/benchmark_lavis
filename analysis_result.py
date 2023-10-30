@@ -226,7 +226,8 @@ def anaylysis_score(result_dir, limit=0):
 
 if __name__ == '__main__':
     DS = 'unbalanced'
-    compute_score([f'result/output_{DS}', f'result/output_{DS}_test'], f'result/output_{DS}_score')
+    MODEL = 'lavis'
+    compute_score([f'result_{MODEL}/output_{DS}', f'result_{MODEL}/output_{DS}_test'], f'result_{MODEL}/output_{DS}_score')
 
     # pred = 'America'
     # gt = ['United States']
