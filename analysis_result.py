@@ -1,8 +1,10 @@
+import argparse
 import ast
 import csv
 from pathlib import Path
-from sentence_transformers import SentenceTransformer, util
+
 import torch
+from sentence_transformers import SentenceTransformer, util
 
 ANSWER_COL_INDEX = 3
 PREDICTION_COL_INDEX = 4
@@ -225,9 +227,12 @@ def anaylysis_score(result_dir, limit=0):
 
 
 if __name__ == '__main__':
-    DS = 'unbalanced'
-    MODEL = 'lavis'
-    compute_score([f'result_{MODEL}/output_{DS}', f'result_{MODEL}/output_{DS}_test'], f'result_{MODEL}/output_{DS}_score')
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--ds', type=str, required=True)
+    parser.add_argument('--model', type=str, required=True)
+    args = parser.parse_args()
+
+    compute_score([f'result_{args.model}/output_{args.ds}', f'result_{args.model}/output_{args.ds}_test'], f'result_{args.model}/output_{args.ds}_score')
 
     # pred = 'America'
     # gt = ['United States']
