@@ -4,17 +4,21 @@ from pathlib import Path
 from sentence_transformers import SentenceTransformer, util
 import torch
 
+ANSWER_COL_INDEX = 3
+PREDICTION_COL_INDEX = 4
+
 METRICS = ['exact_match', 'substring', 'similarity']
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
-similarity_model = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2', device=device)
+
+# https://github.com/UKPLab/sentence-transformers
+similarity_model = SentenceTransformer('all-MiniLM-L6-v2', device=device)
 
 
 class Score:
     exact_match: int = 0
     substring: int = 0
     similarity: float = 0.0
-    vqa_acc: float = 0.0
 
     def __getitem__(self, item):
         if item == 'exact_match':
@@ -23,8 +27,6 @@ class Score:
             return self.substring
         if item == 'similarity':
             return self.similarity
-        if item == 'vqa_acc':
-            return self.vqa_acc
 
     def __setitem__(self, key, value):
         if key == 'exact_match':
@@ -33,11 +35,12 @@ class Score:
             self.substring = value
         if key == 'similarity':
             self.similarity = value
-        if key == 'vqa_acc':
-            self.vqa_acc = value
 
     def __str__(self):
         return f'exact_match: {self.exact_match}; substring: {self.substring}; similarity: {self.similarity:.2f};'
+
+    def to_list(self):
+        return [self[k] for k in METRICS]
 
 
 # gt is the ground truth list of answers
@@ -84,7 +87,60 @@ def get_ratio(a, b):
     return a / b
 
 
-def analysis_result(list_of_result_dir, limit=0):
+def compute_score(list_of_result_dir, output_dir, limit=0):
+    if not Path(output_dir).exists():
+        Path(output_dir).mkdir(parents=True)
+
+    count = 0
+    for folder in list_of_result_dir:
+        if 0 < limit <= count:
+            break
+        for csvfile in Path(folder).iterdir():
+            if 0 < limit <= count:
+                break
+            csv_file = f'{csvfile.parent}/{csvfile.name}'
+            f = open(csv_file)
+
+            count += 1
+            if count % 100 == 0:
+                print(count)
+
+            csv_reader = csv.reader(f)
+
+            score_file = open(f'{output_dir}/{csvfile.name}', 'w', encoding='utf-8')
+            csv_writer = csv.writer(score_file)
+
+            row = next(csv_reader)
+            csv_writer.writerow([*row, *METRICS])
+
+            for row in csv_reader:
+                # there's a bug that the answer set is empty, ignore them
+                answer_str = row[ANSWER_COL_INDEX].lower()  # 3: answer, 4: prediction
+                answer = ast.literal_eval(answer_str)
+                if len(answer) == 0:
+                    continue
+
+                prediction_str = row[PREDICTION_COL_INDEX].lower()  # 3: answer, 4: prediction
+                if prediction_str.startswith('['):
+                    prediction_str = ast.literal_eval(prediction_str)[0]
+                prediction = extract_answer(prediction_str)
+
+                # compute all scores
+                current_score = Score()
+                if 'exact_match' in METRICS:
+                    current_score.exact_match = exact_match_score(prediction, answer)
+                if 'substring' in METRICS:
+                    current_score.substring = substring_score(prediction, answer)
+                if 'similarity' in METRICS:
+                    current_score.similarity = similarity_score(prediction, answer)
+
+                csv_writer.writerow([*row, *current_score.to_list()])
+
+            score_file.close()
+            f.close()
+
+
+def anaylysis_score(result_dir, limit=0):
     total = 0
     score = Score()
 
@@ -110,61 +166,50 @@ def analysis_result(list_of_result_dir, limit=0):
     }
 
     count = 0
-    for folder in list_of_result_dir:
-        if 0 < limit < count:
+    for csvfile in Path(result_dir).iterdir():
+        if 0 < limit <= count:
             break
-        for csvfile in Path(folder).iterdir():
-            if 0 < limit < count:
-                break
-            csv_file = f'{csvfile.parent}/{csvfile.name}'
-            with open(csv_file) as f:
-                count += 1
-                if count % 100 == 0:
-                    print(count)
+        csv_file = f'{csvfile.parent}/{csvfile.name}'
+        f = open(csv_file)
 
-                reader = csv.DictReader(f)
-                for row in reader:
-                    # there's a bug that the answer set is empty, ignore them
-                    answer_str = row['answer'].lower()
-                    answer = ast.literal_eval(answer_str)
-                    if len(answer) == 0:
-                        continue
+        count += 1
 
-                    total += 1
+        reader = csv.DictReader(f)
+        for row in reader:
+            # there's a bug that the answer set is empty, ignore them
+            answer_str = row[ANSWER_COL_INDEX].lower()
+            answer = ast.literal_eval(answer_str)
+            if len(answer) == 0:
+                continue
 
-                    n_hop = row['n_hop']
-                    if n_hop not in total_by_hop:
-                        total_by_hop[n_hop] = 0
-                        score_by_hop[n_hop] = Score()
-                    total_by_hop[n_hop] += 1
+            total += 1
 
-                    if row['has_scene_graph']:
-                        total_by_scene_graph['with'] += 1
-                    else:
-                        total_by_scene_graph['without'] += 1
+            n_hop = row['n_hop']
+            if n_hop not in total_by_hop:
+                total_by_hop[n_hop] = 0
+                score_by_hop[n_hop] = Score()
+            total_by_hop[n_hop] += 1
 
-                    ds_name = 'VG' if row['id'].startswith('VG_') else 'GLDv2'
-                    total_by_ds[ds_name] += 1
+            if row['has_scene_graph']:
+                total_by_scene_graph['with'] += 1
+            else:
+                total_by_scene_graph['without'] += 1
 
-                    prediction_str = row['prediction'].lower()
-                    if prediction_str.startswith('['):
-                        prediction_str = ast.literal_eval(prediction_str)[0]
-                    prediction = extract_answer(prediction_str)
+            ds_name = 'VG' if row['id'].startswith('VG_') else 'GLDv2'
+            total_by_ds[ds_name] += 1
 
-                    # compute all scores
-                    current_score = Score()
-                    if 'exact_match' in METRICS:
-                        current_score.exact_match = exact_match_score(prediction, answer)
-                    if 'substring' in METRICS:
-                        current_score.substring = substring_score(prediction, answer)
-                    if 'similarity' in METRICS:
-                        current_score.similarity = similarity_score(prediction, answer)
+            current_score = Score()
+            current_score.exact_match = row[-3]
+            current_score.substring = row[-2]
+            current_score.similarity = row[-1]
 
-                    for s in METRICS:
-                        score[s] += current_score[s]
-                        score_by_hop[n_hop][s] += current_score[s]
-                        score_by_scene_graph['with' if row['has_scene_graph'] else 'without'][s] += current_score[s]
-                        score_by_ds[ds_name][s] += current_score[s]
+            for s in METRICS:
+                score[s] += current_score[s]
+                score_by_hop[n_hop][s] += current_score[s]
+                score_by_scene_graph['with' if row['has_scene_graph'] else 'without'][s] += current_score[s]
+                score_by_ds[ds_name][s] += current_score[s]
+
+        f.close()
 
     print('Total:', total, '| Score:', score)
     for s in METRICS:
@@ -180,9 +225,10 @@ def analysis_result(list_of_result_dir, limit=0):
 
 
 if __name__ == '__main__':
-    analysis_result(['result/output_balanced_10', 'result/output_balanced_10_test'])
+    DS = 'unbalanced'
+    compute_score([f'result/output_{DS}', f'result/output_{DS}_test'], f'result/output_{DS}_score')
 
     # pred = 'America'
     # gt = ['United States']
-    # scr = substring_score(pred, gt)
+    # scr = similarity_score(pred, gt)
     # print(scr)
