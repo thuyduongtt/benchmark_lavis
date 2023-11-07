@@ -14,7 +14,7 @@ METRICS = ['exact_match', 'substring', 'similarity']
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 # https://github.com/UKPLab/sentence-transformers
-similarity_model = SentenceTransformer('all-MiniLM-L6-v2', device=device)
+similarity_model = None
 
 
 class Score:
@@ -60,6 +60,10 @@ def substring_score(pred, gt):
 
 # https://huggingface.co/tasks/sentence-similarity
 def similarity_score(pred, gt):
+    global similarity_model
+    if similarity_model is None:
+        similarity_model = SentenceTransformer('all-MiniLM-L6-v2', device=device)
+
     max_score = 0
     pred_emb = similarity_model.encode(pred, convert_to_tensor=True, device=device)
     for s in gt:
@@ -179,7 +183,7 @@ def anaylysis_score(result_dir, limit=0):
         reader = csv.DictReader(f)
         for row in reader:
             # there's a bug that the answer set is empty, ignore them
-            answer_str = row[ANSWER_COL_INDEX].lower()
+            answer_str = row['answer'].lower()
             answer = ast.literal_eval(answer_str)
             if len(answer) == 0:
                 continue
@@ -200,16 +204,12 @@ def anaylysis_score(result_dir, limit=0):
             ds_name = 'VG' if row['id'].startswith('VG_') else 'GLDv2'
             total_by_ds[ds_name] += 1
 
-            current_score = Score()
-            current_score.exact_match = row[-3]
-            current_score.substring = row[-2]
-            current_score.similarity = row[-1]
-
             for s in METRICS:
-                score[s] += current_score[s]
-                score_by_hop[n_hop][s] += current_score[s]
-                score_by_scene_graph['with' if row['has_scene_graph'] else 'without'][s] += current_score[s]
-                score_by_ds[ds_name][s] += current_score[s]
+                val = ast.literal_eval(row[s])
+                score[s] += val
+                score_by_hop[n_hop][s] += val
+                score_by_scene_graph['with' if row['has_scene_graph'] else 'without'][s] += val
+                score_by_ds[ds_name][s] += val
 
         f.close()
 
@@ -232,9 +232,10 @@ if __name__ == '__main__':
     parser.add_argument('--model', type=str, required=True)
     args = parser.parse_args()
 
-    compute_score([f'result_{args.model}/output_{args.ds}', f'result_{args.model}/output_{args.ds}_test'], f'result_{args.model}/output_{args.ds}_score')
+    # compute_score([f'result_{args.model}/output_{args.ds}', f'result_{args.model}/output_{args.ds}_test'], f'result_{args.model}/output_{args.ds}_score')
+    anaylysis_score(f'result_{args.model}/output_{args.ds}_score')
 
-    # pred = 'America'
-    # gt = ['United States']
+    # pred = '984 feet'
+    # gt = ['300 meters']
     # scr = similarity_score(pred, gt)
     # print(scr)
