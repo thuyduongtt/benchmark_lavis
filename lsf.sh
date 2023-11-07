@@ -37,9 +37,10 @@ source activate lavis
 # cd ~/
  
 # 3. Perform experiments
-DATASET_DIR='unbalanced'
-python start.py --path_to_ds $DATASET_DIR --output_dir_name output_${DATASET_DIR}
-python start.py --path_to_ds $DATASET_DIR --output_dir_name output_${DATASET_DIR}_test --split test
+DS_NAME="unbalanced"
+DS_DIR="../dataset/${DS_NAME}"
+python start.py --path_to_ds $DS_DIR --output_dir_name output_${DS_NAME}
+python start.py --path_to_ds $DS_DIR --output_dir_name output_${DS_NAME}_test --split test
 
 
 # No longer exit on any error.
