@@ -26,21 +26,15 @@ set -e # Exit on any error. Do not put this line before the two mandatory ones.
  
 module load conda
 
-# 1. Specify conda env
-source activate lavis
-
 # To access internet within bsub script
 # module load proxy4server-access
 # source /fs/applications/p4s-access/2.0/ActivateP4S.sh -a
 
-# 2. Specify your work directory here
+# Specify your work directory here
 # cd ~/
  
-# 3. Perform experiments
-DS_NAME="unbalanced"
-DS_DIR="../dataset/${DS_NAME}"
-python start.py --path_to_ds $DS_DIR --output_dir_name output_${DS_NAME}
-python start.py --path_to_ds $DS_DIR --output_dir_name output_${DS_NAME}_test --split test
+# Perform experiments
+./run.sh
 
 
 # No longer exit on any error.

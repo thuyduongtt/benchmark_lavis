@@ -1,6 +1,6 @@
 #!/bin/bash
 
-conda activate lavis
+source activate lavis
 
 DS_NAME="unbalanced"
 DS_DIR="../dataset/${DS_NAME}"
