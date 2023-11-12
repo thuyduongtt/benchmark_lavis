@@ -36,8 +36,11 @@ def vqatask(image, question):
     model, vis_processors, txt_processors = blip_model
     raw_image = Image.open(image).convert('RGB')
     image = vis_processors['eval'](raw_image).unsqueeze(0).to(device)
-    # question = txt_processors['eval'](question)
-    # return model.predict_answers(samples={'image': image, 'text_input': question}, inference_method='generate')
+
+    if MODEL_NAME == 'blip_vqa':
+        question = txt_processors['eval'](question)
+        return model.predict_answers(samples={'image': image, 'text_input': question}, inference_method='generate')
+
     return model.generate({"image": image, "prompt": f"Question: {question} Answer:"})
 
 
