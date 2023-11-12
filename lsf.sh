@@ -1,10 +1,10 @@
-#BSUB -J BLIP[3-4]                 # Specify the job name
-#BSUB -W 48:00                # Specify the maximum runtime in "hours:minutes"
+#BSUB -J BLIP[1-4]                 # Specify the job name
+#BSUB -W 36:00                # Specify the maximum runtime in "hours:minutes"
 #BSUB -o %x.%j.out            # Determine where the output will be written
 #BSUB -e %x.%j.err            # The same goes for the error file
  
 #BSUB -n 2                        # Specify the number of CPUS
-#BSUB -M 24000                     # Specify the RAM PER CPU in MB that your job will use.
+#BSUB -M 8000                     # Specify the RAM PER CPU in MB that your job will use.
 #BSUB -gpu "num=1"                # Specify the number of GPUs
 #BSUB -R "span[hosts=1]"          # run on a single host
 #BSUB -q batch_v100

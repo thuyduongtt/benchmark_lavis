@@ -25,5 +25,5 @@ esac
 
 
 DS_DIR="../dataset/${DS_NAME}"
-python start.py --path_to_ds $DS_DIR --output_dir_name output_${DS_NAME} --model_name $MODEL_NAME --model_type $MODEL_TYPE
-python start.py --path_to_ds $DS_DIR --output_dir_name output_${DS_NAME}_test --split test --model_name $MODEL_NAME --model_type $MODEL_TYPE
+python start.py --path_to_ds $DS_DIR --output_dir_name output_${MODEL_NAME}_${DS_NAME} --model_name $MODEL_NAME --model_type $MODEL_TYPE
+python start.py --path_to_ds $DS_DIR --output_dir_name output_${MODEL_NAME}_${DS_NAME}_test --split test --model_name $MODEL_NAME --model_type $MODEL_TYPE
