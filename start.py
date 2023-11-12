@@ -7,14 +7,27 @@ from lavis.models import load_model_and_preprocess
 from pipeline import run_pipeline
 
 blip_model = None
+MODEL_NAME = ''
+MODEL_TYPE = ''
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 
 def load_model():
     global blip_model
-    # blip_model = load_model_and_preprocess(name='blip_vqa', model_type='vqav2', is_eval=True, device=device)  # LAVIS
-    blip_model = load_model_and_preprocess(name="blip2_t5", model_type="pretrain_flant5xxl", is_eval=True, device=device)  # BLIP-2
+
+    blip_model = load_model_and_preprocess(name=MODEL_NAME, model_type=MODEL_TYPE, is_eval=True, device=device)
+
+    # Available models for BLIP:
+    # name='blip_vqa', model_type='vqav2'
+    # name='blip_vqa', model_type='okvqa'
+    # name='blip_vqa', model_type='aokvqa'
+
+    # Available models for BLIP-2:
+    # name="blip2_opt", model_type="pretrain_opt2.7b"
+    # name="blip2_opt", model_type="pretrain_opt6.7b"
+    # name="blip2_t5", model_type="pretrain_flant5xl"
+    # name="blip2_t5", model_type="pretrain_flant5xxl"
 
 
 def vqatask(image, question):
@@ -35,7 +48,12 @@ if __name__ == '__main__':
     parser.add_argument('--split', type=str, default='train', help='Set to "train" or "test"')
     parser.add_argument('--start_at', type=int, default=0, help='Index of the sample to start from')
     parser.add_argument('--limit', type=int, default=0, help='Max number of samples')
+    parser.add_argument('--model_name', type=str, default='blip2_t5', help='Path to dataset')
+    parser.add_argument('--model_type', type=str, default='pretrain_flant5xxl', help='Path to dataset')
     args = parser.parse_args()
+
+    MODEL_NAME = args.model_name
+    MODEL_TYPE = args.model_type
 
     run_pipeline(vqatask, args.path_to_ds, args.output_dir_name, limit=args.limit, start_at=args.start_at,
                  split=args.split)
