@@ -5,19 +5,18 @@ from pathlib import Path
 import ijson
 
 
-def init_csv_file(output_dir_name):
-    if not Path(output_dir_name).exists():
-        Path(output_dir_name).mkdir(parents=True)
+def run_pipeline_by_question(task, path_to_dataset, output_dir_name, limit=0, start_at=0, split='train'):
+    def init_csv_file():
+        if not Path(output_dir_name).exists():
+            Path(output_dir_name).mkdir(parents=True)
 
-    timestamp = datetime.now().isoformat()
-    csv_file = open(f'{output_dir_name}/result_{timestamp}.csv', 'w', encoding='utf-8')
-    csv_writer = csv.writer(csv_file)
-    csv_writer.writerow(['id', 'image', 'question', 'answer', 'prediction', 'n_hop', 'has_scene_graph', 'split'])
-    return csv_file, csv_writer
+        timestamp = datetime.now().isoformat()
+        csvfile = open(f'{output_dir_name}/result_{timestamp}.csv', 'w', encoding='utf-8')
+        csvwriter = csv.writer(csvfile)
+        csvwriter.writerow(['id', 'image', 'question', 'answer', 'prediction', 'n_hop', 'has_scene_graph', 'split'])
+        return csvfile, csvwriter
 
-
-def run_pipeline(task, path_to_dataset, output_dir_name, limit=0, start_at=0, split='train'):
-    csv_file, csv_writer = init_csv_file(output_dir_name)
+    csv_file, csv_writer = init_csv_file()
 
     json_data = stream_data(f'{path_to_dataset}/{split}.json', limit=limit, start_at=start_at)
 
@@ -31,7 +30,7 @@ def run_pipeline(task, path_to_dataset, output_dir_name, limit=0, start_at=0, sp
         # split into smaller CSV file every 1000 records
         if i % 1000 == 0:
             csv_file.close()
-            csv_file, csv_writer = init_csv_file(output_dir_name)
+            csv_file, csv_writer = init_csv_file()
 
         local_img_path = f"{split}/{d['image_id']}.jpg"
         img_path = f"{path_to_dataset}/" + local_img_path
@@ -79,3 +78,42 @@ def stream_data(path_to_json_file, limit=0, start_at=0):
                 return
 
             yield record
+
+
+def run_pipeline_by_image(task, path_to_dataset, output_dir_name, limit=0, start_at=0, split='train'):
+    def init_csv_file():
+        if not Path(output_dir_name).exists():
+            Path(output_dir_name).mkdir(parents=True)
+
+        timestamp = datetime.now().isoformat()
+        csvfile = open(f'{output_dir_name}/result_{timestamp}.csv', 'w', encoding='utf-8')
+        csvwriter = csv.writer(csvfile)
+        csvwriter.writerow(['id', 'image', 'prediction', 'split'])
+        return csvfile, csvwriter
+
+    csv_file, csv_writer = init_csv_file()
+
+    i = 0
+    for img_file in Path(f'{path_to_dataset}/{split}').iterdir():
+        if img_file.name.startswith('.'):
+            continue
+
+        i += 1
+
+        if i == 1 or i % 100 == 0:
+            print(f"[{i}]: {img_file.name}")
+
+        # split into smaller CSV file every 1000 records
+        if i % 1000 == 0:
+            csv_file.close()
+            csv_file, csv_writer = init_csv_file()
+
+        local_img_path = f"{split}/{img_file.name}"
+        img_path = f"{path_to_dataset}/" + local_img_path
+
+        prediction = task(img_path)
+        # prediction = 'prediction'  # turn off model for pipeline testing
+
+        csv_writer.writerow([img_file.name, local_img_path, prediction, split])
+
+    csv_file.close()

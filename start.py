@@ -4,7 +4,7 @@ import torch
 from PIL import Image
 from lavis.models import load_model_and_preprocess
 
-from pipeline import run_pipeline
+from pipeline import run_pipeline_by_question, run_pipeline_by_image
 
 blip_model = None
 MODEL_NAME = ''
@@ -65,7 +65,7 @@ def vqa_task(image, row_data):
         return model.generate({"image": image, "prompt": question})
 
 
-def image_captioning_task(image, row_data=None):
+def image_captioning_task(image):
     if blip_model is None:
         load_model()
     model, vis_processors, txt_processors = blip_model
@@ -91,17 +91,15 @@ def main():
     MODEL_NAME = args.model_name
     MODEL_TYPE = args.model_type
 
-    task = None
     if args.task == 'vqa':
-        task = vqa_task
+        run_pipeline_by_question(vqa_task, args.path_to_ds, args.output_dir_name, limit=args.limit,
+                                 start_at=args.start_at, split=args.split)
     elif args.task == 'image_captioning':
-        task = image_captioning_task
+        run_pipeline_by_image(image_captioning_task, args.path_to_ds, args.output_dir_name, limit=args.limit,
+                              start_at=args.start_at, split=args.split)
 
-    if task is None:
+    else:
         print('Invalid task')
-        return
-
-    run_pipeline(task, args.path_to_ds, args.output_dir_name, limit=args.limit, start_at=args.start_at, split=args.split)
 
 
 def main_test():
