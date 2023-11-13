@@ -28,14 +28,14 @@ case $1 in
   5)
     TASK='image_captioning'
     DS_NAME="unbalanced"
-    MODEL_NAME="blip2_t5"
-    MODEL_TYPE="caption_coco_flant5xl"
+    MODEL_NAME="blip2_opt"
+    MODEL_TYPE="caption_coco_opt6.7b"
     ;;
   6)
     TASK='image_captioning'
     DS_NAME="balanced_10"
-    MODEL_NAME="blip2_t5"
-    MODEL_TYPE="caption_coco_flant5xl"
+    MODEL_NAME="blip2_opt"
+    MODEL_TYPE="caption_coco_opt6.7b"
     ;;
 esac
 
