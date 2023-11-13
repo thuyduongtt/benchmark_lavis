@@ -45,12 +45,14 @@ def load_model():
     # name="blip2_t5", model_type="caption_coco_flant5xl"
 
 
-def vqa_task(image, question):
+def vqa_task(image, row_data):
     if blip_model is None:
         load_model()
     model, vis_processors, txt_processors = blip_model
     raw_image = Image.open(image).convert('RGB')
     image = vis_processors['eval'](raw_image).unsqueeze(0).to(device)
+
+    question = row_data['question']
 
     if MODEL_NAME == 'blip_vqa':
         question = txt_processors['eval'](question)
@@ -63,7 +65,7 @@ def vqa_task(image, question):
         return model.generate({"image": image, "prompt": question})
 
 
-def image_captioning_task(image):
+def image_captioning_task(image, row_data=None):
     if blip_model is None:
         load_model()
     model, vis_processors, txt_processors = blip_model

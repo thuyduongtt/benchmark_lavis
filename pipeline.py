@@ -36,7 +36,7 @@ def run_pipeline(task, path_to_dataset, output_dir_name, limit=0, start_at=0, sp
         local_img_path = f"{split}/{d['image_id']}.jpg"
         img_path = f"{path_to_dataset}/" + local_img_path
 
-        prediction = task(img_path, d['question'])
+        prediction = task(img_path, d)
         # prediction = 'prediction'  # turn off model for pipeline testing
 
         answers = d['answers']
