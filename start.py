@@ -37,7 +37,12 @@ def load_model():
     # name="blip2_t5_instruct", model="flant5xxl"
 
     # ========== Image Captioning Task
+    # BLIP
     # name="blip_caption", model_type="base_coco"
+    # BLIP-2
+    # name="blip2_opt", model_type="caption_coco_opt2.7b"
+    # name="blip2_opt", model_type="caption_coco_opt6.7b"
+    # name="blip2_t5", model_type="caption_coco_flant5xl"
 
 
 def vqa_task(image, question):
