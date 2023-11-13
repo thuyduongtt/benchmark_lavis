@@ -29,6 +29,12 @@ def load_model():
     # name="blip2_t5", model_type="pretrain_flant5xl"
     # name="blip2_t5", model_type="pretrain_flant5xxl"
 
+    # Available models for InstructBLIP
+    # name="blip2_vicuna_instruct", model="vicuna7b"
+    # name="blip2_vicuna_instruct", model="vicuna13b"
+    # name="blip2_t5_instruct", model="flant5xl"
+    # name="blip2_t5_instruct", model="flant5xxl"
+
 
 def vqatask(image, question):
     if blip_model is None:
@@ -41,7 +47,11 @@ def vqatask(image, question):
         question = txt_processors['eval'](question)
         return model.predict_answers(samples={'image': image, 'text_input': question}, inference_method='generate')
 
-    return model.generate({"image": image, "prompt": f"Question: {question} Answer:"})
+    if MODEL_NAME in ["blip2_opt", "blip2_t5"]:
+        return model.generate({"image": image, "prompt": f"Question: {question} Answer:"})
+
+    if MODEL_NAME in ["blip2_vicuna_instruct", "blip2_t5_instruct"]:
+        return model.generate({"image": image, "prompt": question})
 
 
 if __name__ == '__main__':
