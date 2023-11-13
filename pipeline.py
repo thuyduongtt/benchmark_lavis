@@ -16,7 +16,7 @@ def init_csv_file(output_dir_name):
     return csv_file, csv_writer
 
 
-def run_pipeline(vqatask, path_to_dataset, output_dir_name, limit=0, start_at=0, split='train'):
+def run_pipeline(task, path_to_dataset, output_dir_name, limit=0, start_at=0, split='train'):
     csv_file, csv_writer = init_csv_file(output_dir_name)
 
     json_data = stream_data(f'{path_to_dataset}/{split}.json', limit=limit, start_at=start_at)
@@ -36,7 +36,7 @@ def run_pipeline(vqatask, path_to_dataset, output_dir_name, limit=0, start_at=0,
         local_img_path = f"{split}/{d['image_id']}.jpg"
         img_path = f"{path_to_dataset}/" + local_img_path
 
-        prediction = vqatask(img_path, d['question'])
+        prediction = task(img_path, d['question'])
         # prediction = 'prediction'  # turn off model for pipeline testing
 
         answers = d['answers']

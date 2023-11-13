@@ -18,6 +18,7 @@ def load_model():
 
     blip_model = load_model_and_preprocess(name=MODEL_NAME, model_type=MODEL_TYPE, is_eval=True, device=device)
 
+    # ========== VQA Task
     # Available models for BLIP:
     # name='blip_vqa', model_type='vqav2'
     # name='blip_vqa', model_type='okvqa'
@@ -35,8 +36,11 @@ def load_model():
     # name="blip2_t5_instruct", model="flant5xl"
     # name="blip2_t5_instruct", model="flant5xxl"
 
+    # ========== Image Captioning Task
+    # name="blip_caption", model_type="base_coco"
 
-def vqatask(image, question):
+
+def vqa_task(image, question):
     if blip_model is None:
         load_model()
     model, vis_processors, txt_processors = blip_model
@@ -54,19 +58,58 @@ def vqatask(image, question):
         return model.generate({"image": image, "prompt": question})
 
 
-if __name__ == '__main__':
+def image_captioning_task(image):
+    if blip_model is None:
+        load_model()
+    model, vis_processors, txt_processors = blip_model
+    raw_image = Image.open(image).convert('RGB')
+    image = vis_processors['eval'](raw_image).unsqueeze(0).to(device)
+
+    return model.generate({"image": image})
+
+
+def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--path_to_ds', type=str, required=True, help='Path to dataset')
     parser.add_argument('--output_dir_name', type=str, default='output', help='Path to output')
     parser.add_argument('--split', type=str, default='train', help='Set to "train" or "test"')
     parser.add_argument('--start_at', type=int, default=0, help='Index of the sample to start from')
     parser.add_argument('--limit', type=int, default=0, help='Max number of samples')
+    parser.add_argument('--model_name', type=str, default='blip2_t5')
+    parser.add_argument('--model_type', type=str, default='pretrain_flant5xxl')
+    parser.add_argument('--task', type=str, default='vqa', help='Task name: vqa, image_captioning')
+    args = parser.parse_args()
+
+    global MODEL_NAME, MODEL_TYPE
+    MODEL_NAME = args.model_name
+    MODEL_TYPE = args.model_type
+
+    task = None
+    if args.task == 'vqa':
+        task = vqa_task
+    elif args.task == 'image_captioning':
+        task = image_captioning_task
+
+    if task is None:
+        print('Invalid task')
+        return
+
+    run_pipeline(task, args.path_to_ds, args.output_dir_name, limit=args.limit, start_at=args.start_at, split=args.split)
+
+
+def main_test():
+    parser = argparse.ArgumentParser()
     parser.add_argument('--model_name', type=str, default='blip2_t5', help='Path to dataset')
     parser.add_argument('--model_type', type=str, default='pretrain_flant5xxl', help='Path to dataset')
     args = parser.parse_args()
 
+    global MODEL_NAME, MODEL_TYPE
     MODEL_NAME = args.model_name
     MODEL_TYPE = args.model_type
 
-    run_pipeline(vqatask, args.path_to_ds, args.output_dir_name, limit=args.limit, start_at=args.start_at,
-                 split=args.split)
+    image_captioning_task('img/bridge.jpg')
+
+
+if __name__ == '__main__':
+    main()
+    # main_test()

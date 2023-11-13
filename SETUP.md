@@ -1,7 +1,6 @@
 # For BLIP and BLIP-2
 Conda env with Python 3.8
-pip install salesforce-lavis
-pip install ijson
+pip install salesforce-lavis ijson
 
 # For InstructBLIP
 git clone https://github.com/salesforce/LAVIS.git
