@@ -112,7 +112,6 @@ def run_pipeline_by_image(task, path_to_dataset, output_dir_name, limit=0, start
         img_path = f"{path_to_dataset}/" + local_img_path
 
         prediction = task(img_path)
-        # prediction = 'prediction'  # turn off model for pipeline testing
 
         csv_writer.writerow([img_file.name, local_img_path, prediction, split])
 

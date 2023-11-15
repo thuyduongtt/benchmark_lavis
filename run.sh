@@ -37,6 +37,18 @@ case $1 in
     MODEL_NAME="blip2_opt"
     MODEL_TYPE="caption_coco_opt6.7b"
     ;;
+  7)
+    TASK='vqa'
+    DS_NAME="unbalanced"
+    MODEL_NAME="blip2_t5"
+    MODEL_TYPE="pretrain_flant5xl"
+    ;;
+  8)
+    TASK='vqa'
+    DS_NAME="balanced_10"
+    MODEL_NAME="blip2_t5"
+    MODEL_TYPE="pretrain_flant5xl"
+    ;;
 esac
 
 

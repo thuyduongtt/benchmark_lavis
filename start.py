@@ -46,6 +46,8 @@ def load_model():
 
 
 def vqa_task(image, row_data):
+    # return f'prediction, {image}, {row_data["question"]}'  # turn off model for pipeline testing
+
     if blip_model is None:
         load_model()
     model, vis_processors, txt_processors = blip_model
