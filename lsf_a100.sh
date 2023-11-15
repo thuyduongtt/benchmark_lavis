@@ -1,5 +1,5 @@
-#BSUB -J BLIP[5-6]                 # Specify the job name
-#BSUB -W 72:00                # Specify the maximum runtime in "hours:minutes"
+#BSUB -J BLIP[7-8]                 # Specify the job name
+#BSUB -W 168:00                # Specify the maximum runtime in "hours:minutes"
 #BSUB -o %x.%j.out            # Determine where the output will be written
 #BSUB -e %x.%j.err            # The same goes for the error file
  
