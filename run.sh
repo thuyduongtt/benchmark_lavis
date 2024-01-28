@@ -49,6 +49,18 @@ case $1 in
     MODEL_NAME="blip2_t5"
     MODEL_TYPE="pretrain_flant5xl"
     ;;
+  9)
+    TASK='vqa'
+    DS_NAME="balanced_10"
+    MODEL_NAME="blip2_t5_instruct"
+    MODEL_TYPE="flant5xl"
+    ;;
+  10)
+    TASK='vqa'
+    DS_NAME="balanced_10"
+    MODEL_NAME="blip2_t5_instruct"
+    MODEL_TYPE="flant5xxl"
+    ;;
 esac
 
 
