@@ -51,11 +51,23 @@ case $1 in
     ;;
   9)
     TASK='vqa'
-    DS_NAME="balanced_10"
+    DS_NAME="unbalanced"
     MODEL_NAME="blip2_t5_instruct"
     MODEL_TYPE="flant5xl"
     ;;
   10)
+    TASK='vqa'
+    DS_NAME="balanced_10"
+    MODEL_NAME="blip2_t5_instruct"
+    MODEL_TYPE="flant5xl"
+    ;;
+  11)
+    TASK='vqa'
+    DS_NAME="unbalanced"
+    MODEL_NAME="blip2_t5_instruct"
+    MODEL_TYPE="flant5xxl"
+    ;;
+  12)
     TASK='vqa'
     DS_NAME="balanced_10"
     MODEL_NAME="blip2_t5_instruct"
