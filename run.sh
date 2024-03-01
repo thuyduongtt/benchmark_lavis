@@ -52,14 +52,14 @@ case $1 in
   9)
     TASK='vqa'
     DS_NAME="unbalanced"
-    MODEL_NAME="blip2_t5_instruct"
-    MODEL_TYPE="flant5xl"
+    MODEL_NAME="blip2_vicuna_instruct"
+    MODEL_TYPE="vicuna13b"
     ;;
   10)
     TASK='vqa'
     DS_NAME="balanced_10"
-    MODEL_NAME="blip2_t5_instruct"
-    MODEL_TYPE="flant5xl"
+    MODEL_NAME="blip2_vicuna_instruct"
+    MODEL_TYPE="vicuna13b"
     ;;
   11)
     TASK='vqa'
