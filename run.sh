@@ -63,6 +63,7 @@ case $1 in
     ;;
 esac
 
+echo 'Running...' $1
 
 DS_DIR="../dataset/${DS_NAME}"
 python start.py \
