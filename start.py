@@ -152,9 +152,8 @@ def main():
     # elif args.task == 'image_captioning':
     #     run_pipeline_by_image(image_captioning_task, args.path_to_ds, args.output_dir_name, limit=args.limit,
     #                           start_at=args.start_at, split=args.split)
-
-    else:
-        print('Invalid task')
+    # else:
+    #     print('Invalid task')
 
 
 def main_test():
