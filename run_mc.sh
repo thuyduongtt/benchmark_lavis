@@ -35,7 +35,7 @@ DS_DIR="../dataset/${DS_NAME}"
 python start.py \
  --task $TASK \
  --path_to_ds $DS_DIR \
- --output_dir_name output_mc_${MODEL_NAME}_${MODEL_TYPE}_${DS_NAME} \
+ --output_dir_name output_mc_${MODEL_NAME}_${MODEL_TYPE}_${DS_NAME}_${START} \
  --model_name $MODEL_NAME \
  --model_type $MODEL_TYPE \
  --start_at $START \
@@ -45,7 +45,7 @@ python start.py \
 python start.py \
  --task $TASK \
  --path_to_ds $DS_DIR \
- --output_dir_name output_mc_${MODEL_NAME}_${MODEL_TYPE}_${DS_NAME}_test \
+ --output_dir_name output_mc_${MODEL_NAME}_${MODEL_TYPE}_${DS_NAME}_test_${START} \
  --split test \
  --model_name $MODEL_NAME \
  --model_type $MODEL_TYPE \
