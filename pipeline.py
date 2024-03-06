@@ -5,7 +5,7 @@ from pathlib import Path
 import ijson
 
 
-def run_pipeline_by_question(task, path_to_dataset, output_dir_name, limit=0, start_at=0, split='train'):
+def run_pipeline_by_question(task, path_to_dataset, output_dir_name, limit=0, start_at=0, split='train', multichoice=False):
     def init_csv_file():
         if not Path(output_dir_name).exists():
             Path(output_dir_name).mkdir(parents=True)
@@ -35,7 +35,7 @@ def run_pipeline_by_question(task, path_to_dataset, output_dir_name, limit=0, st
         local_img_path = f"{split}/{d['image_id']}.jpg"
         img_path = f"{path_to_dataset}/" + local_img_path
 
-        prediction = task(img_path, d)
+        prediction = task(img_path, d, multichoice)
         # prediction = 'prediction'  # turn off model for pipeline testing
 
         answers = d['answers']
