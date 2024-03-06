@@ -76,6 +76,7 @@ case $1 in
 esac
 
 DS_DIR="../dataset/${DS_NAME}"
+
 python start.py \
  --task $TASK \
  --path_to_ds $DS_DIR \

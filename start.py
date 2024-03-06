@@ -72,17 +72,25 @@ def vqa_task(image, row_data, multichoice=False):
 
         question += "Answer with the option's letter from the given choices directly."
 
-    print(question)
+    # print(question)
 
     if MODEL_NAME == 'blip_vqa':
         question = txt_processors['eval'](question)
-        return model.predict_answers(samples={'image': image, 'text_input': question}, inference_method='generate')
+        output = model.predict_answers(samples={'image': image, 'text_input': question}, inference_method='generate')
 
-    if MODEL_NAME in ["blip2_opt", "blip2_t5"]:
-        return model.generate({"image": image, "prompt": f"Question: {question} Answer:"})
+    elif MODEL_NAME in ["blip2_opt", "blip2_t5"]:
+        output = model.generate({"image": image, "prompt": f"Question: {question} Answer:"})
 
-    if MODEL_NAME in ["blip2_vicuna_instruct", "blip2_t5_instruct"]:
-        return model.generate({"image": image, "prompt": question})
+    elif MODEL_NAME in ["blip2_vicuna_instruct", "blip2_t5_instruct"]:
+        output = model.generate({"image": image, "prompt": question})
+
+    else:
+        output = None
+
+    if multichoice:
+        return f'{output} | {[c["symbol"] + ". " + c["choice"] for c in list_of_choices]}'
+
+    return output
 
 
 def image_captioning_task(image):
@@ -144,16 +152,16 @@ def main():
     MODEL_NAME = args.model_name
     MODEL_TYPE = args.model_type
 
-    test_model()
+    # test_model()
 
-    # if args.task == 'vqa':
-    #     run_pipeline_by_question(vqa_task, args.path_to_ds, args.output_dir_name, limit=args.limit,
-    #                              start_at=args.start_at, split=args.split, multichoice=args.multichoice)
-    # elif args.task == 'image_captioning':
-    #     run_pipeline_by_image(image_captioning_task, args.path_to_ds, args.output_dir_name, limit=args.limit,
-    #                           start_at=args.start_at, split=args.split)
-    # else:
-    #     print('Invalid task')
+    if args.task == 'vqa':
+        run_pipeline_by_question(vqa_task, args.path_to_ds, args.output_dir_name, limit=args.limit,
+                                 start_at=args.start_at, split=args.split, multichoice=args.multichoice)
+    elif args.task == 'image_captioning':
+        run_pipeline_by_image(image_captioning_task, args.path_to_ds, args.output_dir_name, limit=args.limit,
+                              start_at=args.start_at, split=args.split)
+    else:
+        print('Invalid task')
 
 
 def main_test():
