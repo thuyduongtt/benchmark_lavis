@@ -1,5 +1,7 @@
 #!/bin/bash
 
+cd ../../dataset
+
 # Install gdown
 pip install --upgrade --no-cache-dir gdown
 

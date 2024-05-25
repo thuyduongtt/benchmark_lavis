@@ -46,7 +46,7 @@ def load_model():
     # name="blip2_t5", model_type="caption_coco_flant5xl"
 
 
-def vqa_task(image, row_data, multichoice=False):
+def vqa_task(image, row_data, choices=None):
     # return f'prediction, {image}, {row_data["question"]}'  # turn off model for pipeline testing
 
     if blip_model is None:
@@ -57,15 +57,14 @@ def vqa_task(image, row_data, multichoice=False):
 
     list_of_choices = []
 
-    if not multichoice:
+    if choices is None:
         question = row_data['question']
     else:
         question = row_data['question'] + '\n'
-        shuffled_choices, shuffled_choice_scores = shuffle(row_data['choices'], row_data['choice_scores'])
-        for ii in range(len(shuffled_choices)):
+        for ii in range(len(choices)):
             list_of_choices.append({
                 'symbol': chr(ii + 65),
-                'choice': shuffled_choices[ii]
+                'choice': choices[ii]
             })
         for ii in range(len(list_of_choices)):
             question += f"{list_of_choices[ii]['symbol']}. {list_of_choices[ii]['choice']}\n"
@@ -87,7 +86,7 @@ def vqa_task(image, row_data, multichoice=False):
     else:
         output = None
 
-    if multichoice:
+    if choices is not None:
         return f'{output} | {[c["symbol"] + ". " + c["choice"] for c in list_of_choices]}'
 
     return output
@@ -101,21 +100,6 @@ def image_captioning_task(image):
     image = vis_processors['eval'](raw_image).unsqueeze(0).to(device)
 
     return model.generate({"image": image})
-
-
-def shuffle(choices, choice_scores):
-    n = len(choices)
-    for i in range(n):
-        j = random.randint(0, n - 1)
-        if i != j:
-            tmp1 = choices[i]
-            tmp2 = choice_scores[i]
-            choices[i] = choices[j]
-            choice_scores[i] = choice_scores[j]
-            choices[j] = tmp1
-            choice_scores[j] = tmp2
-
-    return choices, choice_scores
 
 
 def test_model():
@@ -135,14 +119,16 @@ def test_model():
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--path_to_ds', type=str, required=True, help='Path to dataset')
+    parser.add_argument('--ds_name', type=str, default='ReasonVQA', help='Valid input: ReasonVQA, VQAv2, OKVQA, GQA')
+    parser.add_argument('--ds_dir', type=str, required=True, help='Path to dataset')
+    parser.add_argument('--img_dir', type=str, default='', help='Path to images')
     parser.add_argument('--output_dir_name', type=str, default='output', help='Path to output')
     parser.add_argument('--split', type=str, default='train', help='Set to "train" or "test"')
     parser.add_argument('--start_at', type=int, default=0, help='Index of the sample to start from')
     parser.add_argument('--limit', type=int, default=0, help='Max number of samples')
     parser.add_argument('--multichoice', action='store_true')
-    parser.add_argument('--model_name', type=str, default='blip2_t5')
-    parser.add_argument('--model_type', type=str, default='pretrain_flant5xxl')
+    parser.add_argument('--model_name', type=str, default='blip2_t5_instruct')
+    parser.add_argument('--model_type', type=str, default='flant5xxl')
     parser.add_argument('--task', type=str, default='vqa', help='Task name: vqa, image_captioning')
     args = parser.parse_args()
 
@@ -155,10 +141,10 @@ def main():
     # test_model()
 
     if args.task == 'vqa':
-        run_pipeline_by_question(vqa_task, args.path_to_ds, args.output_dir_name, limit=args.limit,
+        run_pipeline_by_question(vqa_task, args.ds_name, args.ds_dir, args.img_dir, args.output_dir_name, limit=args.limit,
                                  start_at=args.start_at, split=args.split, multichoice=args.multichoice)
     elif args.task == 'image_captioning':
-        run_pipeline_by_image(image_captioning_task, args.path_to_ds, args.output_dir_name, limit=args.limit,
+        run_pipeline_by_image(image_captioning_task, args.ds_name, args.ds_dir, args.img_dir, args.output_dir_name, limit=args.limit,
                               start_at=args.start_at, split=args.split)
     else:
         print('Invalid task')
