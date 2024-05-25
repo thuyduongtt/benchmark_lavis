@@ -11,6 +11,7 @@ case $1 in
   2)
     MULTICHOICE=false
     ;;
+esac
 
 DS_DIR="../dataset/${DS_NAME}"
 IMG_DIR="../dataset/COCO/val2014"
