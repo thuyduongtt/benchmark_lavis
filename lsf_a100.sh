@@ -1,4 +1,4 @@
-#BSUB -J BLIP[1-2]                 # Specify the job name
+#BSUB -J BLIP[1-8]                 # Specify the job name
 #BSUB -W 168:00                # Specify the maximum runtime in "hours:minutes"
 #BSUB -o %x.%j.out            # Determine where the output will be written
 #BSUB -e %x.%j.err            # The same goes for the error file
@@ -36,7 +36,8 @@ module load conda
 # Perform experiments
 source activate lavis
 #./run_mc.sh $LSB_JOBINDEX
-./scripts/run_OKVQA.sh $LSB_JOBINDEX
+#./scripts/run_OKVQA.sh $LSB_JOBINDEX
+./scripts/run_VQAv2.sh $LSB_JOBINDEX
 
 
 # No longer exit on any error.
