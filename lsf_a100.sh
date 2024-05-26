@@ -35,7 +35,8 @@ module load conda
  
 # Perform experiments
 source activate lavis
-./run_mc.sh $LSB_JOBINDEX
+#./run_mc.sh $LSB_JOBINDEX
+./scripts/run_OKVQA.sh $LSB_JOBINDEX
 
 
 # No longer exit on any error.
