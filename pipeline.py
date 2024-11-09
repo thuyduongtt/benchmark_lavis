@@ -7,7 +7,7 @@ import random
 
 DATASETS = ['ReasonVQA', 'VQAv2', 'OKVQA', 'GQA']
 CSV_HEADER = {
-    'ReasonVQA': ['id', 'image', 'question', 'answer', 'prediction', 'n_hop', 'has_scene_graph', 'split']
+    'ReasonVQA': ['question_id', 'image_id', 'image', 'question', 'answer', 'prediction', 'n_hop', 'has_scene_graph', 'split']
 }
 
 
@@ -23,7 +23,7 @@ def run_pipeline_by_question(task, ds_name, ds_dir, img_dir, output_dir_name, li
         if ds_name in CSV_HEADER:
             csvwriter.writerow(CSV_HEADER[ds_name])
         else:
-            csvwriter.writerow(['id', 'image', 'question', 'answer', 'prediction'])
+            csvwriter.writerow(['question_id', 'image_id', 'image', 'question', 'answer', 'prediction'])
         return csvfile, csvwriter
 
     csv_file, csv_writer = init_csv_file()
@@ -55,10 +55,10 @@ def run_pipeline_by_question(task, ds_name, ds_dir, img_dir, output_dir_name, li
         answers = d['answers']
 
         if ds_name == 'ReasonVQA':
-            csv_writer.writerow([d['image_id'], img_path, d['question'], answers,
+            csv_writer.writerow([d['question_id'], d['image_id'], img_path, d['question'], answers,
                                  prediction, d['n_hop'], d['has_scene_graph'], split])
         else:
-            csv_writer.writerow([d['image_id'], img_path, d['question'], answers, prediction])
+            csv_writer.writerow([d['question_id'], d['image_id'], img_path, d['question'], answers, prediction])
 
     csv_file.close()
 
@@ -108,6 +108,7 @@ def stream_data_reasonvqa(ds_dir, ds_split, limit=0, start_at=0):
                 return
 
             yield {
+                'question_id': record['question_id'],
                 'image_id': record['image_id'],
                 'question': record['question'],
                 'answers': record['answers'],
@@ -168,6 +169,7 @@ def stream_data_vqa(ds_dir, limit=0, start_at=0, okvqa=False):
             choice_scores = [1] * len(answers) + [0] * (len(choices) - len(answers))
 
             yield {
+                'question_id': record['question_id'],
                 'image_id': record['image_id'],
                 'question': questions[record['question_id']],
                 'answers': answers,
